@@ -1,0 +1,13 @@
+{
+  "name": "coastline-max-for-live",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Monophonic polyrhythmic MIDI sequencer for Max for Live and Make Noise 0-Coast",
+  "scripts": {
+    "build": "node scripts/build-device.js",
+    "package": "npm run build && python3 scripts/package-device.py",
+    "test": "node --test test/*.test.js",
+    "check": "npm run build && npm test"
+  },
+  "engines": { "node": ">=18" }
+}

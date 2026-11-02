@@ -1,0 +1,42 @@
+COASTLINE - Max-Quellpatch, Version 0.1
+=====================================
+
+1. Das ZIP vollstaendig entpacken und diesen Ordner zusammenhalten.
+   COASTLINE.maxpat und die drei coastline-*.js liegen nebeneinander.
+
+2. In Max ueber File > Open die Datei COASTLINE.maxpat oeffnen.
+   Verwende die entpackte Originaldatei unveraendert. Du brauchst keinen
+   Text aus dem Chat in einen Editor zu kopieren.
+
+3. Wenn kein Patchfenster erscheint: OPEN-TEST.maxpat aus demselben Ordner
+   ueber File > Open oeffnen. Dieser kleine Kontrollpatch hat keine
+   externen Abhaengigkeiten und muss einen grossen Text anzeigen.
+
+4. Bei Problemen die tatsaechlich verwendete .maxpat-Datei im Chat anhaengen.
+   Falls die Max Console einen neuen Fehler zeigt, auch diesen mitteilen.
+   Der Inhalt und die Dateigroesse lassen sich anhand des Dateinamens oder
+   eines Screenshots des Oeffnen-Dialogs nicht sicher feststellen.
+
+Die richtige Hauptdatei beginnt mit { und enthaelt "patcher".
+Die richtigen .js-Dateien enthalten JavaScript und kein "patcher"-Dokument.
+DATEIEN.txt enthaelt die exakten Dateigroessen und SHA-256-Pruefsummen.
+
+ALS LIVE-MIDI-EFFEKT VERWENDEN
+----------------------------
+
+Das Oeffnen des Quellpatches und der Export als Live-Geraet sind getrennte
+Schritte. Der Quellpatch ist noch keine fertige .amxd-Datei.
+
+- In Live ein leeres Max MIDI Effect laden und auf Edit klicken.
+- Im COASTLINE-Quellfenster auf Patching Mode wechseln, entsperren,
+  alle Objekte auswaehlen (Cmd+A) und kopieren (Cmd+C).
+- Zum Fenster des leeren Live-MIDI-Effekts wechseln, dessen vorhandene
+  Objekte entfernen und die kopierten Objekte einfuegen (Cmd+V).
+- Im Patcher Inspector Open in Presentation aktivieren und Device Width
+  auf 1110 stellen.
+- Als COASTLINE.amxd in DIESEM Ordner neben den drei JS-Dateien speichern.
+- In Live mit einem internen Instrument testen, danach den 0-Coast anbinden.
+
+Details zu MIDI-Routing und Bedienung: README.md.
+Noch offene Live-/Hardwarepruefungen: HOST-TEST.md.
+Der Quellpatch wurde in dieser Cloud nicht in Max oder Live ausgefuehrt.
