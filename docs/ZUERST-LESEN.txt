@@ -1,42 +1,28 @@
-COASTLINE - Max-Quellpatch, Version 0.1
-=====================================
+COASTLINE - Version 0.2 / Build fuer den Test in Live
+==================================================
 
-1. Das ZIP vollstaendig entpacken und diesen Ordner zusammenhalten.
-   COASTLINE.maxpat und die drei coastline-*.js liegen nebeneinander.
+1. ZIP entpacken.
+2. In Live eine bisher von Hand zusammengestellte COASTLINE-Instanz entfernen.
+3. COASTLINE.amxd direkt vor ein Instrument auf eine MIDI-Spur ziehen.
+   Im GitHub-Projekt liegt die Datei im Ordner device.
+4. RUN einschalten und die Live-Wiedergabe starten.
 
-2. In Max ueber File > Open die Datei COASTLINE.maxpat oeffnen.
-   Verwende die entpackte Originaldatei unveraendert. Du brauchst keinen
-   Text aus dem Chat in einen Editor zu kopieren.
+Die .amxd enthaelt den kompletten Patch und die drei Skripte. Es ist kein
+Kopieren von Objekten und kein Einstellen des Patcher Inspectors erforderlich.
+Die Zahlenfelder muessen sichtbar sein; links muessen zwei Rhythmusreihen
+erscheinen. Bei Fehlern: Edit oeffnen und Window > Max Console ansehen.
+Bitte den aktuellen Fehlertext melden.
 
-3. Wenn kein Patchfenster erscheint: OPEN-TEST.maxpat aus demselben Ordner
-   ueber File > Open oeffnen. Dieser kleine Kontrollpatch hat keine
-   externen Abhaengigkeiten und muss einen grossen Text anzeigen.
+Dieser Build wurde programmgesteuert erstellt und sein Archivformat geprueft.
+Ein erfolgreicher Ladevorgang sowie MIDI-Ausgabe und Timing in Live sind hier
+noch nicht bestaetigt. HOST-TEST.md beschreibt die offenen Funktionspruefungen.
 
-4. Bei Problemen die tatsaechlich verwendete .maxpat-Datei im Chat anhaengen.
-   Falls die Max Console einen neuen Fehler zeigt, auch diesen mitteilen.
-   Der Inhalt und die Dateigroesse lassen sich anhand des Dateinamens oder
-   eines Screenshots des Oeffnen-Dialogs nicht sicher feststellen.
+QUELLEN
+-------
+COASTLINE.maxpat ist der editierbare Quellpatch. Fuer die Arbeit daran muessen
+die drei coastline-*.js im gleichen Ordner bleiben. Alle Regler sind seit 0.2
+auch in der Patching-Ansicht innerhalb des sichtbaren Geraetebereichs angeordnet.
 
-Die richtige Hauptdatei beginnt mit { und enthaelt "patcher".
-Die richtigen .js-Dateien enthalten JavaScript und kein "patcher"-Dokument.
-DATEIEN.txt enthaelt die exakten Dateigroessen und SHA-256-Pruefsummen.
-
-ALS LIVE-MIDI-EFFEKT VERWENDEN
-----------------------------
-
-Das Oeffnen des Quellpatches und der Export als Live-Geraet sind getrennte
-Schritte. Der Quellpatch ist noch keine fertige .amxd-Datei.
-
-- In Live ein leeres Max MIDI Effect laden und auf Edit klicken.
-- Im COASTLINE-Quellfenster auf Patching Mode wechseln, entsperren,
-  alle Objekte auswaehlen (Cmd+A) und kopieren (Cmd+C).
-- Zum Fenster des leeren Live-MIDI-Effekts wechseln, dessen vorhandene
-  Objekte entfernen und die kopierten Objekte einfuegen (Cmd+V).
-- Im Patcher Inspector Open in Presentation aktivieren und Device Width
-  auf 1110 stellen.
-- Als COASTLINE.amxd in DIESEM Ordner neben den drei JS-Dateien speichern.
-- In Live mit einem internen Instrument testen, danach den 0-Coast anbinden.
-
-Details zu MIDI-Routing und Bedienung: README.md.
-Noch offene Live-/Hardwarepruefungen: HOST-TEST.md.
-Der Quellpatch wurde in dieser Cloud nicht in Max oder Live ausgefuehrt.
+OPEN-TEST.maxpat ist ein einfacher Kontrollpatch ohne Skripte. DATEIEN.txt im
+gebauten Paket enthaelt Dateigroessen und SHA-256-Pruefsummen.
+Details zu Routing und Bedienung stehen in README.md.

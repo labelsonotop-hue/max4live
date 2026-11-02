@@ -143,9 +143,9 @@
           "maxclass": "live.toggle",
           "patching_rect": [
             14,
-            230,
-            18,
-            18
+            142,
+            17,
+            17
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -391,9 +391,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             226,
-            275,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -466,9 +466,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             277,
-            310,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -541,9 +541,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             328,
-            345,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -616,9 +616,9 @@
           "maxclass": "live.menu",
           "patching_rect": [
             226,
-            380,
+            104,
             146,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -774,9 +774,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             399,
-            415,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -849,9 +849,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             450,
-            450,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -924,9 +924,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             501,
-            485,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -999,9 +999,9 @@
           "maxclass": "live.menu",
           "patching_rect": [
             399,
-            520,
+            104,
             146,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1156,9 +1156,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             578,
-            555,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1231,9 +1231,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             638,
-            590,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1306,9 +1306,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             698,
-            625,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1381,9 +1381,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             758,
-            660,
+            53,
             44,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1483,9 +1483,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             578,
-            695,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1558,9 +1558,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             608,
-            730,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1633,9 +1633,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             638,
-            765,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1708,9 +1708,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             668,
-            800,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1783,9 +1783,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             698,
-            835,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1858,9 +1858,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             728,
-            870,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -1933,9 +1933,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             758,
-            905,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2008,9 +2008,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             788,
-            940,
+            119,
             27,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2137,9 +2137,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             853,
-            975,
+            53,
             49,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2212,9 +2212,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             916,
-            1010,
+            53,
             49,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2287,9 +2287,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             979,
-            1045,
+            53,
             49,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2362,9 +2362,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             1042,
-            1080,
+            53,
             49,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2437,9 +2437,9 @@
           "maxclass": "live.numbox",
           "patching_rect": [
             853,
-            1115,
+            119,
             66,
-            18
+            19
           ],
           "presentation": 1,
           "presentation_rect": [
@@ -2543,7 +2543,7 @@
             247,
             20
           ],
-          "text": "0.1 / native Max source prototype",
+          "text": "0.2 / embedded-script prototype",
           "fontsize": 9,
           "textcolor": [
             0.72,

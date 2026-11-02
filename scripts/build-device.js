@@ -1,8 +1,9 @@
 "use strict";
-// Generate the editable Max patch. Exporting a .amxd requires Max for Live.
+// Generate editable source plus a self-contained MIDI device for host testing.
 const fs = require("node:fs");
 const path = require("node:path");
 const { defaults } = require("../device/coastline-core.js");
+const { pack, unpack } = require("./amxd.js");
 const boxes = [], lines = [], parameters = {};
 const controls = [];
 function box(id, maxclass, rect, extra = {}) {
@@ -26,7 +27,7 @@ function label(id, text, x, y, width, size = 10, color = [0.72, 0.77, 0.79, 1]) 
 function number(name, title, x, y, lo, hi, width = 44) {
   const id = `ui-${name}`;
   label(`label-${name}`, title, x, y - 19, width + 4);
-  box(id, "live.numbox", [x, 240 + controls.length * 35, width, 18], {
+  box(id, "live.numbox", [x, y, width, 19], {
     presentation: 1, presentation_rect: [x, y, width, 19],
     varname: name, parameter_enable: 1,
     saved_attribute_attributes: { valueof: {
@@ -41,7 +42,7 @@ function number(name, title, x, y, lo, hi, width = 44) {
 function menu(name, title, items, x, y, width = 86) {
   const id = `ui-${name}`;
   label(`label-${name}`, title, x, y - 19, width);
-  box(id, "live.menu", [x, 240 + controls.length * 35, width, 18], {
+  box(id, "live.menu", [x, y, width, 19], {
     presentation: 1, presentation_rect: [x, y, width, 19],
     varname: name, parameter_enable: 1,
     saved_attribute_attributes: { valueof: {
@@ -76,7 +77,7 @@ box("rhythm-view", "jsui", [14, 59, 190, 60], {
   presentation: 1, presentation_rect: [14, 59, 190, 60], parameter_enable: 0
 });
 label("key", "A: 1/16     B: 1/16 or 1/8T", 14, 119, 204, 9);
-box("ui-enabled", "live.toggle", [14, 230, 18, 18], {
+box("ui-enabled", "live.toggle", [14, 142, 17, 17], {
   presentation: 1, presentation_rect: [14, 142, 17, 17],
   varname: "enabled", parameter_enable: 1,
   saved_attribute_attributes: { valueof: {
@@ -123,7 +124,7 @@ number("channel", "Channel", 1042, 53, 1, 16, 49);
 number("seed", "Seed", 853, 119, 1, 9999, 66);
 label("output-help", "Same seed = repeatable variation.", 933, 101, 170, 9);
 label("output-help2", "PANIC latches mute; RESET resumes.", 933, 115, 174, 9);
-label("output-help3", "0.1 / native Max source prototype", 853, 145, 247, 9);
+label("output-help3", "0.2 / embedded-script prototype", 853, 145, 247, 9);
 
 object("engine", "js coastline-max.js", 610, 420, 200);
 object("unpack-notes", "unpack i i i", 610, 470, 130);
@@ -185,3 +186,26 @@ const patch = { patcher: {
 const destination = path.resolve(__dirname, "../device/COASTLINE.maxpat");
 fs.writeFileSync(destination, JSON.stringify(patch, null, 2) + "\n");
 console.log(`Built ${path.relative(process.cwd(), destination)} (${boxes.length} objects).`);
+// Match the native resource archive framing, with the three scripts embedded.
+// This is a programmatic build, not a claim of successful export or execution in Max.
+const resources = patch.patcher.dependency_cache.map(({ name }) => ({
+  name, type: "TEXT", data: fs.readFileSync(path.resolve(__dirname, "../device", name))
+}));
+const main = JSON.parse(JSON.stringify(patch));
+main.patcher.project = {
+  version: 1, creationdate: 2082844800, modificationdate: 2082844800,
+  viewrect: [0, 0, 300, 500], autoorganize: 1, hideprojectwindow: 1,
+  showdependencies: 1, autolocalize: 0,
+  contents: { code: Object.fromEntries(resources.map(r => [r.name, { kind: "javascript", local: 1 }])) },
+  layout: {}, searchpath: {}, detailsvisible: 0, amxdtype: 0, readonly: 1,
+  devpathtype: 0, devpath: ".", sortmode: 0
+};
+main.patcher.latency = 0;
+const file = pack([
+  { name: "COASTLINE.amxd", type: "JSON", data: Buffer.from(JSON.stringify(main) + "\n\0") },
+  ...resources
+]);
+const recovered = unpack(file);
+if (recovered.length !== 4) throw new Error("Incomplete device resources");
+fs.writeFileSync(path.resolve(__dirname, "../device/COASTLINE.amxd"), file);
+console.log("Built device/COASTLINE.amxd (main patch and three embedded scripts; host test pending).");

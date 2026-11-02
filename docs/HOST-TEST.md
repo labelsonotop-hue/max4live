@@ -6,14 +6,17 @@ Integrationsprüfungen von den automatisierten Logiktests.
 
 ## Laden und Wiederherstellen
 
-- Gerät als Max **MIDI Effect** gemäß README erstellen, neben den drei Skripten
-  speichern. Die Max-Konsole darf keine fehlenden Dateien oder Objekte melden.
+- `device/COASTLINE.amxd` direkt vor ein Instrument auf eine MIDI-Spur ziehen.
+  Die Max-Konsole darf keine fehlenden Dateien oder Objekte melden. Das Laden
+  des programmgesteuert erzeugten Gerätebuilds ist selbst Teil dieser Prüfung.
 - Präsentation: beide Rhythmusreihen, alle Regler, RUN, RESET und PANIC sichtbar.
 - Root, einen Pitch-Offset, Kanal und B-Unterteilung ändern, Set speichern,
   schließen und öffnen. Werte und tatsächliche Ausgabe müssen wiederhergestellt
   sein. Zweites Device darf einen unabhängigen Zustand besitzen.
-- Gerät einfrieren. Zum Test den Quellordner verschieben und das eingefrorene
-  Gerät erneut laden. Erst nach diesem Test ist es eigenständig verteilbar.
+- Nur die `.amxd` in einen eigenen Ordner kopieren und von dort erneut laden.
+  Die Quellen müssen während dieses Tests außerhalb des Max-Suchpfads liegen.
+  So prüfen, dass alle drei eingebetteten Skripte tatsächlich aufgelöst werden.
+  Erst nach diesem Test ist der Build als eigenständig geprüft zu bezeichnen.
 
 ## Host-Synchronisation und Rhythmus
 

@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "dist" / "COASTLINE-source.zip"
 SOURCE_FILES = {
+    "COASTLINE.amxd": ROOT / "device" / "COASTLINE.amxd",
     "COASTLINE.maxpat": ROOT / "device" / "COASTLINE.maxpat",
     "coastline-max.js": ROOT / "device" / "coastline-max.js",
     "coastline-core.js": ROOT / "device" / "coastline-core.js",

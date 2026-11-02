@@ -3,10 +3,11 @@
 Ein experimenteller, **monophoner MIDI-Sequencer für Max for Live**, ausgelegt auf
 polyrhythmische und perkussive Patterns am Make Noise **0-Coast**.
 
-**Stand: 0.1, editierbarer Prototyp.** Die Logik wird unter Node getestet; der
-Max-Patch wurde hier noch nicht in Ableton Live ausgeführt. Es gibt deshalb noch
-keine in Live exportierte oder geprüfte `.amxd`-Datei. Max/Live und die Hardware
-sind für den abschließenden Funktionstest erforderlich.
+**Stand: 0.2, Prototyp für den Host-Test.** Enthalten sind ein editierbarer
+Quellpatch und `device/COASTLINE.amxd` mit eingebetteten Skripten. Der Gerätebuild
+wird programmgesteuert erzeugt; sein Archivformat wurde gegen ein offizielles
+Ableton-MIDI-Gerät geprüft. Laden, Transport und MIDI-Ausgabe müssen noch in
+Max/Live geprüft werden. Die Node-Tests ersetzen diesen Funktionstest nicht.
 
 ## Musikalische Idee
 
@@ -30,42 +31,30 @@ B ein- und ausblenden, indem du `B Hits` zwischen 0 und 3 wechselst.
 
 ## In Live verwenden
 
-Zum Übertragen der Originaldateien gibt es ein ZIP-Paket. Im Checkout erzeugt
-`npm run package` (Node 18+ und Python 3) die Datei
-`dist/COASTLINE-source.zip`. Das ZIP vollständig entpacken und die Dateien
-unverändert verwenden. Es enthält den Quellpatch und alle drei JS-Dateien
-nebeneinander sowie `ZUERST-LESEN.txt`. `OPEN-TEST.maxpat` ist ein kleiner Patch
-ohne Abhängigkeiten, mit dem sich das Öffnen einer lokalen Max-Datei prüfen
-lässt. Das Paket wird gegen die Quelldateien und per ZIP-CRC geprüft; dies ist
-kein Nachweis eines erfolgreichen Ladens in Max.
-
 Benötigt werden Ableton Live mit **Max for Live** und Max 8 oder neuer auf einer
 von Live unterstützten Plattform. Die Zielversionen sind noch im Host zu testen.
 Node ist nur für Entwicklung und Tests nötig, nicht für das spätere Device.
 
-1. Das ZIP entpacken oder das komplette Repository lokal herunterladen. Die drei
-   `.js`-Dateien müssen neben `COASTLINE.maxpat` liegen bleiben: im ZIP im Ordner
-   `COASTLINE`, im Repository im Ordner `device`.
-2. In Live ein leeres **Max MIDI Effect** auf eine MIDI-Spur ziehen und dessen
-   **Edit**-Schaltfläche anklicken. Damit steht der richtige Gerätetyp fest.
-3. Im Max-Editor zusätzlich `COASTLINE.maxpat` aus diesem Ordner öffnen. Im **Patching Mode**
-   alle Objekte dieses Quellpatches auswählen und kopieren.
-4. Zum Fenster des leeren MIDI-Effekts wechseln. Dort ebenfalls im Patching Mode
-   die vorhandenen Objekte entfernen und die kopierten Objekte einfügen.
-   Das Quellpatch-Fenster und das Gerätefenster sind zwei verschiedene Fenster.
-5. In den **Patcher Inspector** des Geräts gehen: **Open in Presentation**
-   einschalten und **Device Width = 1110** einstellen. Diese Patcher-Einstellungen
-   werden beim Kopieren der Objekte nicht mit übertragen.
-6. Das Gerät als `COASTLINE.amxd` **im gleichen Ordner wie die JS-Dateien**
-   speichern. Zur Presentation-Ansicht wechseln und den Max-Editor schließen.
-7. Live starten. **RUN** muss eingeschaltet sein. Zunächst mit einem internen
-   Instrument prüfen; danach die Hardware anbinden.
+1. Das Repository über **Code → Download ZIP** herunterladen und entpacken.
+2. Eine bisher von Hand zusammengestellte COASTLINE-Instanz aus der Spur
+   entfernen. `device/COASTLINE.amxd` direkt vor ein Live-Instrument auf eine
+   MIDI-Spur ziehen. Das Gerät enthält den vollständigen Patch und alle drei
+   Skripte. Einstellungen für Presentation und Gerätebreite sind enthalten.
+3. **RUN** einschalten und Live starten. Zahlenfelder und beide Rhythmusreihen
+   müssen sichtbar sein. Zunächst mit dem internen Instrument prüfen.
+4. Falls Anzeige oder MIDI-Ausgabe fehlen: über **Edit** die **Max Console**
+   öffnen, den aktuellen Fehlertext notieren und zusammen mit einem Screenshot
+   melden. Die programmgesteuerte `.amxd` ist ein Build für diesen Host-Test.
 
-Zum Weitergeben das in Max gespeicherte Gerät **einfrieren / Freeze Device**.
-Im Projekt-/Abhängigkeitsfenster prüfen, dass `coastline-max.js`,
-`coastline-core.js` und `coastline-view.js` eingeschlossen sind. Das eingefrorene
-Gerät anschließend ohne Zugriff auf den Quellordner erneut laden und testen.
-Ein bloßes Umbenennen von `.maxpat` in `.amxd` ersetzt diesen Export nicht.
+Zum Bearbeiten liegt `device/COASTLINE.maxpat` daneben. Seine drei `.js`-Dateien
+müssen für die Arbeit am Quellpatch im selben Ordner bleiben. Alle Regler stehen
+seit 0.2 auch in der Patching-Ansicht im sichtbaren Gerätebereich. Im Build werden
+der Quellpatch und die Skripte automatisch in die `.amxd` übernommen.
+
+`npm run package` (Node 18+ und Python 3) erzeugt zusätzlich
+`dist/COASTLINE-source.zip` mit Device, Quellen und Anleitung. Das Archiv wird
+gegen die Quelldateien und per ZIP-CRC geprüft. `docs/OPEN-TEST.maxpat` prüft das
+Öffnen eines einfachen lokalen Patches ohne Skripte.
 
 ## 0-Coast anschließen
 
@@ -130,12 +119,17 @@ cd /pfad/zu/max4live
 npm run check
 ```
 
-`npm run build` erzeugt den Max-Quellpatch aus
+`npm run build` erzeugt `.maxpat` und `.amxd` aus
 [`scripts/build-device.js`](scripts/build-device.js). Layoutänderungen dort
-vornehmen; die generierte `.maxpat` nicht parallel von Hand bearbeiten.
+vornehmen. [`scripts/amxd.js`](scripts/amxd.js) schreibt und prüft den MIDI-Wrapper
+und das Max-Ressourcenarchiv. Die Struktur wurde durch einen bytegleichen
+Lese-/Schreibdurchlauf mit dem MIDI-Gerät aus dem offiziellen
+[Ableton Connection Kit](https://github.com/Ableton/m4l-connection-kit) geprüft.
+Dabei wurden keine fremden Patch- oder Medieninhalte in COASTLINE übernommen.
 
 Die automatisierten Tests prüfen Verteilung und Rotation aller Patternlängen,
 4:3-Unterteilung, Kollisionen, Tonhöhenzyklen, MIDI-Grenzen, deterministischen
 Zufall, Ratchet-Zeitfenster und den Max-Adapter mit einem simulierten Scheduler.
-Sie ersetzen keinen Max-/Live-Test. Die konkrete Host-Prüfung steht in
+Weitere Tests prüfen eingebettete Skripte, vollständige Verkabelung und sichtbare
+Regler in beiden Max-Ansichten. Sie ersetzen keinen Max-/Live-Test. Die konkrete Host-Prüfung steht in
 [`docs/HOST-TEST.md`](docs/HOST-TEST.md).
