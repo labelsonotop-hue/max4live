@@ -6,12 +6,50 @@ const fs = require("node:fs");
 const path = require("node:path");
 const directory = path.resolve(__dirname, "../device");
 
-function maxHarness() {
+function maxHarness(options = {}) {
   let now = 0;
-  const tasks = new Set(), events = [];
-  const context = vm.createContext({
-    post: () => {},
-    outlet: (port, ...args) => events.push({ port, args: JSON.parse(JSON.stringify(args)), time: now }),
+  let interval = 60000 / 120 / 12, clockOn = false;
+  const tasks = new Set(), events = [], logs = [], apis = new Set();
+  const song = { tempo: 120, is_playing: 0, ...options.song };
+  let context;
+  const clock = { at: 0, fire() {
+    tasks.delete(clock);
+    if (!clockOn) return;
+    context.bang();
+    if (clockOn) { clock.at = now + interval; tasks.add(clock); }
+  }};
+  context = vm.createContext({
+    post: message => logs.push(message),
+    outlet: (port, ...args) => {
+      events.push({ port, args: JSON.parse(JSON.stringify(args)), time: now });
+      if (!options.simulateClock) return;
+      if (port === 4) { interval = args[0]; assert.ok(interval > 0); }
+      if (port === 2) {
+        clockOn = !!args[0];
+        if (clockOn) { clock.at = now; tasks.add(clock); }
+        else tasks.delete(clock);
+      }
+    },
+    LiveAPI: function (callback, apiPath) {
+      assert.equal(apiPath, "live_set");
+      this.id = now >= (options.apiReadyAfter || 0) ? 1 : 0;
+      this.callback = callback;
+      let property = "";
+      Object.defineProperty(this, "property", {
+        get: () => property,
+        set: value => {
+          assert.ok(["", "tempo", "is_playing"].includes(value));
+          property = value;
+          if (value && this.id) callback([value, song[value]]);
+        }
+      });
+      this.get = property => {
+        assert.ok(this.id > 0);
+        assert.ok(property in song);
+        return options.scalarAPI ? song[property] : [song[property]];
+      };
+      apis.add(this);
+    },
     Task: function (callback, owner) {
       this.schedule = delay => { this.at = now + delay; tasks.add(this); };
       this.cancel = () => tasks.delete(this);
@@ -21,7 +59,13 @@ function maxHarness() {
   });
   vm.runInContext(fs.readFileSync(path.join(directory, "coastline-max.js"), "utf8"), context);
   return {
-    context, events, tasks,
+    context, events, tasks, logs,
+    setSong(values, notify = true) {
+      Object.assign(song, values);
+      if (notify) for (const api of apis) {
+        if (api.id && api.property in values) api.callback([api.property, song[api.property]]);
+      }
+    },
     notes: () => events.filter(e => e.port === 0).map(e => {
       const [status, pitch, velocity] = e.args[0];
       assert.ok(status >= 128 && status <= 159);
@@ -112,6 +156,81 @@ test("device bypass and deletion flush pending work", () => {
   assert.equal(h.notes().at(-1)[1], 0);
 });
 
+test("Live API starts MIDI through an independent millisecond clock and stops it on Live stop", () => {
+  const h = maxHarness({ simulateClock: true, song: { tempo: 90 } }), c = h.context;
+  c.init();
+  assert.equal(h.notes().length, 0);
+  h.setSong({ is_playing: 1 });
+  h.advance(700);
+  assert.ok(h.notes().some(n => n[1] > 0));
+  assert.equal(c.playing, 1);
+  const periods = h.events.filter(e => e.port === 4).map(e => e.args[0]);
+  assert.ok(periods.every(ms => Math.abs(ms - 60000 / 90 / 12) < 0.0001));
+  h.setSong({ is_playing: 0 });
+  const emitted = h.notes().length;
+  h.advance(2000);
+  assert.equal(h.notes().length, emitted);
+  assert.equal(c.playing, 0);
+  c.notifydeleted();
+  assert.equal(h.tasks.size, 0);
+});
+
+test("loading into a playing song, duplicate initialization and tempo updates work without manual bangs", () => {
+  const h = maxHarness({ simulateClock: true, scalarAPI: true, song: { tempo: 120, is_playing: 1 } });
+  const c = h.context;
+  c.param("aLength", 16); c.param("aHits", 16); c.param("bHits", 0); c.param("ratchet", 0);
+  c.init(); h.advance(200);
+  const startCount = h.notes().filter(n => n[1] > 0).length;
+  assert.ok(startCount >= 2);
+  const oldPulse = c.pulse;
+  c.init();
+  assert.equal(c.pulse, oldPulse, "Fallback boot must not reset the phase");
+  h.setSong({ tempo: 60 }); h.advance(1200);
+  assert.ok(h.notes().filter(n => n[1] > 0).length > startCount);
+  assert.equal(c.bpm, 60);
+  assert.equal(h.events.filter(e => e.port === 4).at(-1).args[0], 60000 / 60 / 12);
+  c.notifydeleted(); h.advance(5000);
+  assert.equal(h.tasks.size, 0);
+});
+
+test("polling recovers delayed API availability and missed notifications", () => {
+  const h = maxHarness({ simulateClock: true, apiReadyAfter: 250, song: { is_playing: 1 } });
+  const c = h.context;
+  c.init(); h.advance(200);
+  assert.equal(h.notes().length, 0);
+  h.advance(500);
+  assert.ok(h.notes().some(n => n[1] > 0));
+  assert.ok(h.logs.some(s => /connection restored/.test(s)));
+  h.setSong({ is_playing: 0 }, false); h.advance(610);
+  assert.equal(c.playing, 0);
+  const stopped = h.notes().length;
+  h.advance(1000);
+  assert.equal(h.notes().length, stopped);
+  c.notifydeleted();
+  assert.equal(h.tasks.size, 0);
+});
+
+test("RUN controls actual clock-driven notes after Live play state has been read", () => {
+  const h = maxHarness({ simulateClock: true, song: { is_playing: 1 } }), c = h.context;
+  c.param("enabled", 0); c.init(); h.advance(200);
+  assert.equal(c.playing, 1);
+  assert.equal(h.notes().length, 0);
+  c.param("enabled", 1); h.advance(700);
+  assert.ok(h.notes().some(n => n[1] > 0));
+  c.panic();
+  const muted = h.notes().length;
+  h.advance(1000);
+  assert.equal(h.notes().length, muted);
+  c.reset(); h.advance(1100);
+  assert.ok(h.notes().length > muted);
+  c.param("enabled", 0);
+  const stopped = h.notes().length;
+  h.advance(2000);
+  assert.equal(h.notes().length, stopped);
+  c.notifydeleted();
+  assert.equal(h.tasks.size, 0);
+});
+
 test("long performance stays monophonic and ends with every note released", () => {
   const h = maxHarness(), c = h.context;
   c.param("aHits", 16); c.param("bHits", 7);
@@ -137,7 +256,7 @@ test("long performance stays monophonic and ends with every note released", () =
   assert.equal(h.tasks.size, 0);
 });
 
-test("patch connections, Live observers, and saved controls cover every engine parameter", () => {
+test("patch routes Live API clock controls and preserves all saved engine controls", () => {
   const { patcher } = JSON.parse(fs.readFileSync(path.join(directory, "COASTLINE.maxpat"), "utf8"));
   const boxes = new Map(patcher.boxes.map(({ box }) => [box.id, box]));
   assert.equal(boxes.size, patcher.boxes.length);
@@ -145,20 +264,20 @@ test("patch connections, Live observers, and saved controls cover every engine p
     assert.ok(boxes.has(line.source[0]), line.source[0]);
     assert.ok(boxes.has(line.destination[0]), line.destination[0]);
   }
-  assert.equal(boxes.get("clock").text, "metro 40 ticks @quantize 40 ticks");
+  assert.equal(boxes.get("clock").text, "metro 41.666667");
   assert.equal(boxes.get("midi-output").text, "midiout");
   const expected = [...Object.keys(require("../device/coastline-core.js").defaults), "enabled"].sort();
   const saved = Object.keys(patcher.parameters).map(id => boxes.get(id).varname).sort();
   assert.deepEqual(saved, expected);
-  for (const name of ["is_playing", "tempo"]) {
-    assert.ok(patcher.boxes.some(({ box }) => box.text === `live.observer @property ${name}`));
-  }
   const connected = (from, outlet, to, inlet) => patcher.lines.some(({ patchline: l }) =>
     l.source[0] === from && l.source[1] === outlet && l.destination[0] === to && l.destination[1] === inlet);
-  assert.ok(connected("live-set", 1, "playing", 1));
-  assert.ok(connected("live-set", 1, "tempo", 1));
-  assert.ok(connected("live-set", 0, "playing", 1));
-  assert.ok(connected("live-set", 0, "tempo", 1));
+  assert.ok(connected("engine", 2, "clock", 0));
+  assert.ok(connected("engine", 3, "live-state", 0));
+  assert.ok(connected("engine", 4, "clock", 1));
+  assert.ok(connected("boot", 0, "boot-delay", 0));
+  assert.ok(connected("boot-delay", 0, "boot-defer", 0));
+  assert.ok(connected("boot-defer", 0, "init-message", 0));
+  assert.ok(!patcher.boxes.some(({ box }) => /^(live\.path|live\.observer|transport\b)/.test(box.text || "")));
   assert.ok(connected("ready", 1, "active", 0));
   assert.ok(connected("ready", 0, "init-defer", 0));
   assert.ok(connected("engine", 0, "midi-events", 0));

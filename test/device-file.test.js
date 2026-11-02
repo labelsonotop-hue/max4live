@@ -32,7 +32,7 @@ test("the generated MIDI device carries the complete patch and all three exact s
   assert.equal(built.openinpresentation, 1);
   assert.equal(built.devicewidth, 1110);
   assert.deepEqual(Object.keys(built.project.contents.code).sort(), files.slice(1).map(f => f.name).sort());
-  for (const name of ["engine", "clock", "playing", "tempo", "active", "midi-output"]) {
+  for (const name of ["engine", "clock", "boot", "boot-delay", "active", "midi-output"]) {
     assert.ok(built.boxes.some(({ box }) => box.id === name), `${name} must be inside the device`);
   }
 });

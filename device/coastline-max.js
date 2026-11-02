@@ -1,7 +1,7 @@
 /* Classic Max [js] adapter. No Node for Max or external packages required. */
 autowatch = 1;
 inlets = 1;
-outlets = 3; // raw MIDI packets; pattern display; metro enable
+outlets = 5; // raw MIDI; display; clock enable; Live play state; clock interval (ms)
 include("coastline-core.js");
 
 var engine = new Coastline.Engine({});
@@ -17,6 +17,12 @@ var deviceActive = 1;
 var suspended = 0;
 var pending = [];
 var generation = 0;
+var clockState = -1;
+var playingAPI = null;
+var tempoAPI = null;
+var pollTask = null;
+var deleted = 0;
+var apiWarning = 0;
 
 function later(fn, delay) {
     var epoch = generation;
@@ -39,7 +45,16 @@ function display(frame) {
     outlet(1, ["laneb", frame.bStep].concat(frame.b));
 }
 function redraw() { display(engine.frame(Math.max(0, pulse), bpm)); }
-function refreshclock() { outlet(2, enabled && playing && deviceActive && !suspended ? 1 : 0); }
+function refreshclock() {
+    // Send the tempo before enabling a plain millisecond metro.
+    outlet(4, 60000 / bpm / 12);
+    outlet(3, playing);
+    var next = enabled && playing && deviceActive && !suspended ? 1 : 0;
+    if (next !== clockState) {
+        clockState = next;
+        outlet(2, next);
+    }
+}
 function param(name, value) {
     if (name === "enabled") {
         enabled = Number(value) ? 1 : 0;
@@ -74,12 +89,13 @@ function transport(value) {
 }
 function tempo(value) {
     if (isFinite(Number(value)) && Number(value) > 0 && Number(value) !== bpm) {
-        bpm = Number(value);
+        bpm = Math.max(20, Math.min(999, Number(value)));
         clearqueue();
+        refreshclock();
     }
 }
 function bang() {
-    if (!(enabled && playing && deviceActive && !suspended)) return;
+    if (deleted || !(enabled && playing && deviceActive && !suspended)) return;
     pulse += 1;
     var frame = engine.frame(pulse, bpm);
     display(frame);
@@ -108,5 +124,68 @@ function panic() {
     suspended = 1;
     refreshclock();
 }
-function init() { post("COASTLINE 0.3 ready\n"); redraw(); refreshclock(); }
-function notifydeleted() { clearqueue(); }
+function livechange(args) {
+    if (deleted || !args || args.length < 2) return;
+    if (args[0] === "tempo") tempo(args[1]);
+    if (args[0] === "is_playing") transport(args[1]);
+}
+function apivalue(api, property) {
+    var value = api.get(property);
+    var list = value !== null && typeof value === "object" && typeof value.length === "number";
+    var number = Number(list ? value[value.length - 1] : value);
+    if (!isFinite(number)) throw new Error("Invalid Live property: " + property);
+    return number;
+}
+function readlive() {
+    if (deleted) return;
+    try {
+        // Bind tempo before play, so the first clock uses the current BPM.
+        if (!tempoAPI || Number(tempoAPI.id) === 0) {
+            tempoAPI = new LiveAPI(livechange, "live_set");
+            if (Number(tempoAPI.id) === 0) throw new Error("Live API is not ready");
+            tempoAPI.property = "tempo";
+        }
+        tempo(apivalue(tempoAPI, "tempo"));
+        if (!playingAPI || Number(playingAPI.id) === 0) {
+            playingAPI = new LiveAPI(livechange, "live_set");
+            if (Number(playingAPI.id) === 0) throw new Error("Live API is not ready");
+            playingAPI.property = "is_playing";
+        }
+        transport(apivalue(playingAPI, "is_playing"));
+        if (apiWarning) post("COASTLINE Live connection restored\n");
+        apiWarning = 0;
+    } catch (error) {
+        transport(0);
+        if (!apiWarning) post("COASTLINE Live connection: " + error + "; retrying\n");
+        apiWarning = 1;
+    }
+}
+function poll() {
+    if (deleted) return;
+    readlive();
+    pollTask.schedule(100);
+}
+function init() {
+    if (deleted) return;
+    if (!pollTask) {
+        post("COASTLINE 0.4 ready\n");
+        pollTask = new Task(poll, this);
+    }
+    pollTask.cancel();
+    redraw();
+    readlive();
+    refreshclock();
+    pollTask.schedule(100);
+}
+function notifydeleted() {
+    deleted = 1;
+    if (pollTask) pollTask.cancel();
+    clearqueue();
+    outlet(2, 0);
+    for (var i = 0; i < 2; i += 1) {
+        var api = i === 0 ? playingAPI : tempoAPI;
+        if (api) {
+            try { api.property = ""; api.id = 0; } catch (error) { /* Device already gone. */ }
+        }
+    }
+}

@@ -3,11 +3,13 @@
 Ein experimenteller, **monophoner MIDI-Sequencer für Max for Live**, ausgelegt auf
 polyrhythmische und perkussive Patterns am Make Noise **0-Coast**.
 
-**Stand: 0.3, Prototyp für den Host-Test.** Enthalten sind ein editierbarer
+**Stand: 0.4, Prototyp für den Host-Test.** Enthalten sind ein editierbarer
 Quellpatch und `device/COASTLINE.amxd` mit eingebetteten Skripten. Der Gerätebuild
 wird programmgesteuert erzeugt; sein Archivformat wurde gegen ein offizielles
 Ableton-MIDI-Gerät geprüft. Laden, Transport und MIDI-Ausgabe müssen noch in
-Max/Live geprüft werden. Die Node-Tests ersetzen diesen Funktionstest nicht.
+Max/Live geprüft werden. Das Laden und die native TEST-Ausgabe wurden vom Nutzer
+in Live bestätigt; der Sequencerstart mit 0.4 ist noch zu prüfen. Die Node-Tests
+ersetzen diesen Funktionstest nicht.
 
 ## Musikalische Idee
 
@@ -63,7 +65,9 @@ Die drei Anzeigen unten rechts helfen beim Eingrenzen:
 Wenn TEST hörbar ist und die Sequenz stillsteht, bitte LIVE und CLK melden.
 Wenn MIDI steigt und das Instrument stumm bleibt, die Geräte-Reihenfolge und
 Zielspur prüfen. Alle drei Werte zusammen mit aktuellen Konsolenmeldungen
-angeben. Beim Laden schreibt die Engine `COASTLINE 0.3 ready` in die Konsole.
+angeben. Beim Laden schreibt die Engine `COASTLINE 0.4 ready` in die Konsole.
+Bei fehlender Live-Verbindung erscheint eine konkrete Meldung; die Verbindung
+wird automatisch erneut versucht.
 
 Zum Bearbeiten liegt `device/COASTLINE.maxpat` daneben. Seine drei `.js`-Dateien
 müssen für die Arbeit am Quellpatch im selben Ordner bleiben. Alle Regler stehen
@@ -121,9 +125,17 @@ Sequencer-Start, nicht zur Songposition. Während laufender Wiedergabe setzen
 Song-Loops und Sprünge die Zyklen **nicht** zurück. Dafür RESET verwenden. Es gibt
 keinen MIDI-Eingangs-Durchlass und keinen eingehenden Transpose-Modus.
 
-Das Grundraster verwendet ein tempoabhängiges Max-`metro` mit **40 ticks** bei
-480 ticks pro Viertelnote: zwölf Impulse pro Viertel. Die Live-Transportmeldung
-schaltet den Generator. Ratchets und Note-offs werden über Max-`Task` geplant.
+Das Grundraster verwendet ein Max-`metro` mit einem Intervall von
+**60000 / Live-BPM / 12 Millisekunden**: zwölf Impulse pro Viertel. Es benötigt
+keinen separat laufenden globalen Max-Transport. Die Engine liest `is_playing`
+und `tempo` direkt über JavaScripts `LiveAPI`. Beobachter melden Änderungen;
+eine zusätzliche Abfrage alle 100 ms gleicht versäumte Meldungen aus und
+versucht eine beim Laden noch nicht verfügbare Verbindung erneut herzustellen.
+Bei API-Fehlern stoppt der Generator. Ratchets und Note-offs werden über
+Max-`Task` geplant.
+
+Der Start erfolgt relativ zur empfangenen Live-Meldung. **Eine absolute
+Phasenausrichtung an Songposition oder Taktraster ist nicht implementiert.**
 Classic Max-`js` läuft mit niedriger Priorität; dies ist **kein samplegenauer**
 Sequencer. Verhalten bei Last, Tempowechseln, Transportstart und externer
 MIDI-Latenz muss im Host geprüft werden. Parameteränderungen beenden laufende
@@ -152,9 +164,13 @@ Die automatisierten Tests prüfen Verteilung und Rotation aller Patternlängen,
 4:3-Unterteilung, Kollisionen, Tonhöhenzyklen, MIDI-Grenzen, deterministischen
 Zufall, Ratchet-Zeitfenster und den Max-Adapter mit einem simulierten Scheduler.
 Weitere Tests prüfen eingebettete Skripte, vollständige Verkabelung und sichtbare
-Regler in beiden Max-Ansichten. Seit 0.3 wird die Live-ID über den folgenden
-Ausgang von `live.path` übernommen und die Geräteaktivierung direkt aus
-`live.thisdevice` gelesen. Die Tests prüfen diese Verbindungen, die MIDI-Bytes
-und einen nativen TEST-Pfad ohne JavaScript. Sie ersetzen keinen Max-/Live-Test.
+Regler in beiden Max-Ansichten. Seit 0.4 wird die Live-Verbindung direkt in der
+Engine verwaltet; ein verzögerter Boot ist zusätzlich zu `live.thisdevice`
+vorhanden. Tests mit simulierter Live-API und Millisekundentakt prüfen RUN,
+Start/Stop, Tempowechsel, Laden in laufende Wiedergabe, erneute Initialisierung
+und verspätete API-Verfügbarkeit. Dabei wird der Takt tatsächlich durch die
+simulierte Zeit ausgelöst; die Tests rufen nicht manuell jeden Schritt auf.
+Weitere Tests prüfen MIDI-Bytes und den nativen TEST-Pfad ohne JavaScript.
+Sie ersetzen keinen Max-/Live-Test.
 Die konkrete Host-Prüfung steht in
 [`docs/HOST-TEST.md`](docs/HOST-TEST.md).

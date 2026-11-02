@@ -1,4 +1,4 @@
-COASTLINE - Version 0.3 / Build fuer den Test in Live
+COASTLINE - Version 0.4 / Build fuer den Test in Live
 ==================================================
 
 1. ZIP entpacken.
@@ -16,6 +16,11 @@ Unten rechts LIVE, CLK und MIDI ablesen:
 - CLK muss bei RUN und Wiedergabe hochzaehlen.
 - MIDI zaehlt MIDI-Pakete einschliesslich Note-offs und TEST.
 Bei Problemen diese Werte und die aktuellen Max-Console-Meldungen mitteilen.
+
+Seit 0.4 liest die Engine Tempo und Play direkt ueber JavaScripts LiveAPI und
+verwendet einen Millisekundentakt. Ein globaler Max-Transport ist nicht noetig.
+Beim Laden muss COASTLINE 0.4 ready in der Konsole erscheinen. API-Fehler werden
+gemeldet und die Verbindung wird automatisch erneut versucht.
 
 Die .amxd enthaelt den kompletten Patch und die drei Skripte. Es ist kein
 Kopieren von Objekten und kein Einstellen des Patcher Inspectors erforderlich.

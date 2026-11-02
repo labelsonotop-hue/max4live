@@ -71,7 +71,7 @@ function action(name, title, x) {
 }
 
 label("title", "COASTLINE", 12, 7, 200, 21, [0.98, 0.71, 0.4, 1]);
-label("subtitle", "MONO / POLYRHYTHMIC MIDI / 0.3", 14, 33, 205, 10);
+label("subtitle", "MONO / POLYRHYTHMIC MIDI / 0.4", 14, 33, 205, 10);
 box("rhythm-view", "jsui", [14, 59, 190, 60], {
   filename: "coastline-view.js", jsarguments: [],
   presentation: 1, presentation_rect: [14, 59, 190, 60], parameter_enable: 0
@@ -140,7 +140,7 @@ indicator("live-state", "LIVE", 853, 881, 25);
 indicator("clock-count", "CLK", 918, 943, 43);
 indicator("midi-count", "MIDI", 994, 1025, 60);
 
-object("engine", "js coastline-max.js", 610, 420, 200, { numinlets: 1, numoutlets: 3 });
+object("engine", "js coastline-max.js", 610, 420, 200, { numinlets: 1, numoutlets: 5 });
 object("midi-events", "t l b", 610, 460, 100);
 object("midi-bytes", "iter", 610, 500, 100);
 object("midi-output", "midiout", 610, 540, 100);
@@ -151,9 +151,11 @@ connect("midi-events", 1, "midi-counter");
 connect("midi-counter", 0, "midi-count");
 connect("midi-bytes", 0, "midi-output");
 connect("engine", 1, "rhythm-view");
-object("clock", "metro 40 ticks @quantize 40 ticks", 610, 350, 260);
+object("clock", "metro 41.666667", 610, 350, 160, { numinlets: 2, numoutlets: 1 });
 object("clock-counter", "counter 0 9999", 900, 350, 130);
 connect("engine", 2, "clock");
+connect("engine", 3, "live-state");
+connect("engine", 4, "clock", 1);
 connect("clock", 0, "engine", 0, 0);
 connect("clock", 0, "clock-counter", 0, 1);
 connect("clock-counter", 0, "clock-count");
@@ -163,36 +165,22 @@ object("init-defer", "deferlow", 14, 330, 100);
 object("init-trigger", "t b b b", 14, 365, 100);
 connect("ready", 0, "init-defer");
 connect("init-defer", 0, "init-trigger");
+// Fallback boot even if the device-ready notification was missed.
+object("boot", "loadbang", 165, 270, 100);
+object("boot-delay", "delay 100", 165, 300, 100);
+object("boot-defer", "deferlow", 165, 330, 100);
+connect("boot", 0, "boot-delay");
+connect("boot-delay", 0, "boot-defer");
 // Native device on/off outlet avoids a second API ID/observer dependency.
 object("active", "prepend deviceactive", 300, 300, 190);
 connect("ready", 1, "active");
 connect("active", 0, "engine");
-// Apply restored Live parameters first, then resolve the Live API, then redraw.
+// Apply restored Live parameters, then initialize JS's Live API in low priority.
 controls.forEach((id, i) => connect("init-trigger", 2, id, 0, i));
-object("live-set", "live.path live_set", 14, 420, 145, { numinlets: 1, numoutlets: 3 });
-connect("init-trigger", 1, "live-set");
 box("init-message", "message", [14, 570, 45, 22], { text: "init" });
 connect("init-trigger", 0, "init-message");
+connect("boot-defer", 0, "init-message");
 connect("init-message", 0, "engine");
-
-function observer(id, property, method, source, x, y) {
-  object(id, `live.observer @property ${property}`, x, y, 240, { numinlets: 2, numoutlets: 2 });
-  // Query the initial ID and also follow asynchronous path resolution.
-  // Using only outlet 0 can leave observers at id 0 after an early query.
-  connect(source, 0, id, 1);
-  connect(source, 1, id, 1);
-  // Accept both bare property values and selector-prefixed notifications.
-  object(`${id}-route`, `route ${property}`, x, y + 35, 170);
-  object(`${id}-method`, `prepend ${method}`, x, y + 70, 170);
-  connect(id, 0, `${id}-route`);
-  connect(`${id}-route`, 0, `${id}-method`);
-  connect(`${id}-route`, 1, `${id}-method`);
-  connect(`${id}-method`, 0, "engine");
-}
-observer("playing", "is_playing", "transport", "live-set", 14, 650);
-connect("playing-route", 0, "live-state");
-connect("playing-route", 1, "live-state");
-observer("tempo", "tempo", "tempo", "live-set", 280, 650);
 object("close", "closebang", 300, 790, 100);
 box("closing-panic", "message", [300, 825, 65, 22], { text: "panic" });
 connect("close", 0, "closing-panic");
@@ -228,14 +216,13 @@ for (const source of ["do-reset", "do-panic", "set-enabled", "closing-panic"]) {
 }
 object("test-on-stop", "sel 0", 1180, 735, 80);
 object("test-on-bypass", "sel 0", 1180, 775, 80);
-connect("playing-route", 0, "test-on-stop");
-connect("playing-route", 1, "test-on-stop");
+connect("engine", 3, "test-on-stop");
 connect("test-on-stop", 0, "test-cancel");
 connect("ready", 1, "test-on-bypass");
 connect("test-on-bypass", 0, "test-cancel");
 
 box("clock-note", "comment", [610, 570, 520, 60], {
-  text: "40 ticks = 1/12 quarter at Max's 480 PPQ. Tempo-relative metro; verify transport coupling and phase in Live. MIDI generator without MIDI input passthrough. Classic js runs at low priority. TEST emits a native channel-1 note and holds the sequencer until RESET.",
+  text: "Clock: 60000 / Live BPM / 12 milliseconds, gated by Live play state via JS LiveAPI. No global Max transport required. Start is relative to the Live API notification, not sample-accurate song phase. TEST holds the sequencer until RESET.",
   linecount: 4
 });
 const patch = { patcher: {

@@ -1,8 +1,10 @@
 # Prüfung in Ableton Live / am 0-Coast
 
-Status: **noch nicht ausgeführt**. In der Cloud sind weder Max noch Live oder
-ein MIDI-/Audio-Interface verfügbar. Diese Liste trennt die noch offenen
-Integrationsprüfungen von den automatisierten Logiktests.
+Status: Das Laden und die native TEST-MIDI-Ausgabe wurden vom Nutzer in Live
+mit 0.3 bestätigt. RUN blieb dabei stehen, LIVE meldete trotz Wiedergabe 0.
+Version 0.4 ersetzt diese Anbindung und den transportabhängigen Takt; ihre
+Sequencerfunktion ist noch im Host zu prüfen. In der Cloud sind weder Max noch
+Live oder ein MIDI-/Audio-Interface verfügbar.
 
 ## Laden und Wiederherstellen
 
@@ -16,6 +18,9 @@ Integrationsprüfungen von den automatisierten Logiktests.
 - Bei laufender Live-Wiedergabe muss LIVE auf 1 wechseln. Mit RUN muessen CLK
   und MIDI steigen. Bleibt ein Wert stehen, den Zustand zusammen mit den
   Konsolenmeldungen protokollieren. Die MIDI-Anzeige zaehlt auch Note-offs.
+- Laden bei bereits laufender Wiedergabe und sehr frueh nach dem Live-Start
+  pruefen. Die direkte LiveAPI-Anbindung muss den aktuellen Status erfassen
+  und bei anfangs fehlender Verbindung selbststaendig erneut versuchen.
 - Root, einen Pitch-Offset, Kanal und B-Unterteilung ändern, Set speichern,
   schließen und öffnen. Werte und tatsächliche Ausgabe müssen wiederhergestellt
   sein. Zweites Device darf einen unabhängigen Zustand besitzen.
@@ -31,8 +36,9 @@ Rasterprüfungen Ratchet und Swing auf 0, Hit auf 100 und alle Pitch-Offsets auf
 
 1. **A-Raster:** A Length/Hits = 16/16, B Hits = 0. Bei 120 BPM müssen 16 Noten
    pro 4/4-Takt mit 125 ms Abstand erscheinen. Bei 90 und 150 BPM entsprechend
-   166,67 und 100 ms. Mit dem Live-Metronom auf Phasenlage prüfen, auch nach Start
-   mitten im Takt. Ein falsches Tempo oder falsche Phase ist ein Integrationsfehler.
+   166,67 und 100 ms. Abstand und Jitter messen. Version 0.4 startet relativ zur
+   empfangenen Live-Meldung; absolute Ausrichtung am Songraster ist nicht
+   implementiert. Den Versatz zum Live-Metronom protokollieren.
 2. **B-Raster:** A Hits = 0, B Length/Hits = 3/3 und B = 1/8T. Bei 120 BPM sind
    zwölf Noten pro 4/4-Takt mit 166,67 ms Abstand zu erwarten.
 3. **4:3:** beide Spuren vollständig füllen. Mit MERGE sind sechs Noten pro
