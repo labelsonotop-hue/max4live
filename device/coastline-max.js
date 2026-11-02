@@ -1,12 +1,13 @@
 /* Classic Max [js] adapter. No Node for Max or external packages required. */
 autowatch = 1;
 inlets = 1;
-outlets = 3; // note lists; pattern display; metro enable
+outlets = 3; // raw MIDI packets; pattern display; metro enable
 include("coastline-core.js");
 
 var engine = new Coastline.Engine({});
 var voice = new Coastline.Voice(function (pitch, velocity, channel) {
-    outlet(0, [pitch, velocity, channel]);
+    // Explicit MIDI status: note-on 0x90 / note-off 0x80, channels 1–16.
+    outlet(0, [(velocity > 0 ? 143 : 127) + channel, pitch, velocity]);
 });
 var pulse = -1;
 var bpm = 120;
@@ -66,12 +67,13 @@ function transport(value) {
         pulse = -1;
         playing = next;
         suspended = 0;
+        post("COASTLINE transport " + playing + "\n");
         redraw();
         refreshclock();
     }
 }
 function tempo(value) {
-    if (isFinite(Number(value)) && Number(value) > 0) {
+    if (isFinite(Number(value)) && Number(value) > 0 && Number(value) !== bpm) {
         bpm = Number(value);
         clearqueue();
     }
@@ -106,5 +108,5 @@ function panic() {
     suspended = 1;
     refreshclock();
 }
-function init() { redraw(); refreshclock(); }
+function init() { post("COASTLINE 0.3 ready\n"); redraw(); refreshclock(); }
 function notifydeleted() { clearqueue(); }

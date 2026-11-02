@@ -10,6 +10,7 @@ function maxHarness() {
   let now = 0;
   const tasks = new Set(), events = [];
   const context = vm.createContext({
+    post: () => {},
     outlet: (port, ...args) => events.push({ port, args: JSON.parse(JSON.stringify(args)), time: now }),
     Task: function (callback, owner) {
       this.schedule = delay => { this.at = now + delay; tasks.add(this); };
@@ -21,7 +22,12 @@ function maxHarness() {
   vm.runInContext(fs.readFileSync(path.join(directory, "coastline-max.js"), "utf8"), context);
   return {
     context, events, tasks,
-    notes: () => events.filter(e => e.port === 0).map(e => e.args[0]),
+    notes: () => events.filter(e => e.port === 0).map(e => {
+      const [status, pitch, velocity] = e.args[0];
+      assert.ok(status >= 128 && status <= 159);
+      assert.ok(pitch >= 0 && pitch <= 127 && velocity >= 0 && velocity <= 127);
+      return [pitch, (status & 0xf0) === 0x90 ? velocity : 0, (status & 0x0f) + 1];
+    }),
     advance(to) {
       while (tasks.size) {
         const task = [...tasks].sort((a, b) => a.at - b.at)[0];
@@ -62,6 +68,36 @@ test("channel change releases the previous channel before further notes", () => 
   assert.deepEqual(h.notes().at(-1), [48, 0, 1]);
   c.reset(); c.bang();
   assert.deepEqual(h.notes().at(-1), [48, 120, 7]);
+});
+
+test("MIDI output encodes actual note-on/off status bytes on channels 1 and 16", () => {
+  for (const channel of [1, 16]) {
+    const h = maxHarness(), c = h.context;
+    c.param("ratchet", 0); c.param("channel", channel);
+    c.transport(1); c.bang(); c.panic();
+    const packets = h.events.filter(e => e.port === 0).map(e => e.args[0]);
+    assert.deepEqual(packets, [[143 + channel, 48, 120], [127 + channel, 48, 0]]);
+  }
+});
+
+test("native TEST path reaches midiout without JavaScript, Live API or clock", () => {
+  const { patcher: p } = JSON.parse(fs.readFileSync(path.join(directory, "COASTLINE.maxpat"), "utf8"));
+  const boxes = new Map(p.boxes.map(({ box }) => [box.id, box]));
+  const blocked = new Set(p.boxes.filter(({ box }) => /^(js |live\.|metro)/.test(box.text || "")).map(({ box }) => box.id));
+  const reached = new Set(), queue = ["ui-test"];
+  while (queue.length) {
+    const id = queue.shift();
+    if (reached.has(id) || blocked.has(id)) continue;
+    reached.add(id);
+    for (const { patchline: l } of p.lines) if (l.source[0] === id) queue.push(l.destination[0]);
+  }
+  for (const id of ["test-on", "test-delay", "test-off", "midi-output"]) assert.ok(reached.has(id), id);
+  assert.equal(boxes.get("test-on").text, "144 48 100");
+  assert.equal(boxes.get("test-off").text, "128 48 0");
+  assert.equal(boxes.get("test-delay").text, "delay 1000");
+  for (const source of ["do-reset", "do-panic", "set-enabled", "closing-panic"]) {
+    assert.ok(p.lines.some(({ patchline: l }) => l.source[0] === source && l.destination[0] === "test-cancel" && l.order === 0));
+  }
 });
 
 test("device bypass and deletion flush pending work", () => {
@@ -110,12 +146,23 @@ test("patch connections, Live observers, and saved controls cover every engine p
     assert.ok(boxes.has(line.destination[0]), line.destination[0]);
   }
   assert.equal(boxes.get("clock").text, "metro 40 ticks @quantize 40 ticks");
-  assert.equal(boxes.get("midi-output").text, "noteout");
+  assert.equal(boxes.get("midi-output").text, "midiout");
   const expected = [...Object.keys(require("../device/coastline-core.js").defaults), "enabled"].sort();
   const saved = Object.keys(patcher.parameters).map(id => boxes.get(id).varname).sort();
   assert.deepEqual(saved, expected);
-  for (const name of ["is_playing", "tempo", "is_active"]) {
+  for (const name of ["is_playing", "tempo"]) {
     assert.ok(patcher.boxes.some(({ box }) => box.text === `live.observer @property ${name}`));
   }
+  const connected = (from, outlet, to, inlet) => patcher.lines.some(({ patchline: l }) =>
+    l.source[0] === from && l.source[1] === outlet && l.destination[0] === to && l.destination[1] === inlet);
+  assert.ok(connected("live-set", 1, "playing", 1));
+  assert.ok(connected("live-set", 1, "tempo", 1));
+  assert.ok(connected("live-set", 0, "playing", 1));
+  assert.ok(connected("live-set", 0, "tempo", 1));
+  assert.ok(connected("ready", 1, "active", 0));
+  assert.ok(connected("ready", 0, "init-defer", 0));
+  assert.ok(connected("engine", 0, "midi-events", 0));
+  assert.ok(connected("midi-events", 0, "midi-bytes", 0));
+  assert.ok(connected("midi-bytes", 0, "midi-output", 0));
   for (const { name } of patcher.dependency_cache) assert.ok(fs.existsSync(path.join(directory, name)));
 });

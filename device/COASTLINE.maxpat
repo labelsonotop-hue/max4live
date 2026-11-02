@@ -71,7 +71,7 @@
             205,
             20
           ],
-          "text": "MONO / POLYRHYTHMIC MIDI",
+          "text": "MONO / POLYRHYTHMIC MIDI / 0.3",
           "fontsize": 10,
           "textcolor": [
             0.72,
@@ -117,10 +117,10 @@
           "patching_rect": [
             14,
             119,
-            204,
+            130,
             20
           ],
-          "text": "A: 1/16     B: 1/16 or 1/8T",
+          "text": "A: 1/16 / B: 1/16 or 1/8T",
           "fontsize": 9,
           "textcolor": [
             0.72,
@@ -132,7 +132,53 @@
           "presentation_rect": [
             14,
             119,
-            204,
+            130,
+            20
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "ui-test",
+          "maxclass": "button",
+          "patching_rect": [
+            148,
+            123,
+            14,
+            14
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            148,
+            123,
+            14,
+            14
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "test-label",
+          "maxclass": "comment",
+          "patching_rect": [
+            166,
+            120,
+            42,
+            20
+          ],
+          "text": "TEST",
+          "fontsize": 9,
+          "textcolor": [
+            0.72,
+            0.77,
+            0.79,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            166,
+            120,
+            42,
             20
           ]
         }
@@ -2535,15 +2581,15 @@
       },
       {
         "box": {
-          "id": "output-help3",
+          "id": "live-state-label",
           "maxclass": "comment",
           "patching_rect": [
             853,
-            145,
-            247,
+            144,
+            28,
             20
           ],
-          "text": "0.2 / embedded-script prototype",
+          "text": "LIVE",
           "fontsize": 9,
           "textcolor": [
             0.72,
@@ -2554,10 +2600,136 @@
           "presentation": 1,
           "presentation_rect": [
             853,
-            145,
-            247,
+            144,
+            28,
             20
           ]
+        }
+      },
+      {
+        "box": {
+          "id": "live-state",
+          "maxclass": "number",
+          "patching_rect": [
+            881,
+            144,
+            25,
+            17
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            881,
+            144,
+            25,
+            17
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "ignoreclick": 1,
+          "fontsize": 9,
+          "parameter_enable": 0
+        }
+      },
+      {
+        "box": {
+          "id": "clock-count-label",
+          "maxclass": "comment",
+          "patching_rect": [
+            918,
+            144,
+            25,
+            20
+          ],
+          "text": "CLK",
+          "fontsize": 9,
+          "textcolor": [
+            0.72,
+            0.77,
+            0.79,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            918,
+            144,
+            25,
+            20
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "clock-count",
+          "maxclass": "number",
+          "patching_rect": [
+            943,
+            144,
+            43,
+            17
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            943,
+            144,
+            43,
+            17
+          ],
+          "minimum": 0,
+          "maximum": 9999,
+          "ignoreclick": 1,
+          "fontsize": 9,
+          "parameter_enable": 0
+        }
+      },
+      {
+        "box": {
+          "id": "midi-count-label",
+          "maxclass": "comment",
+          "patching_rect": [
+            994,
+            144,
+            31,
+            20
+          ],
+          "text": "MIDI",
+          "fontsize": 9,
+          "textcolor": [
+            0.72,
+            0.77,
+            0.79,
+            1
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            994,
+            144,
+            31,
+            20
+          ]
+        }
+      },
+      {
+        "box": {
+          "id": "midi-count",
+          "maxclass": "number",
+          "patching_rect": [
+            1025,
+            144,
+            60,
+            17
+          ],
+          "presentation": 1,
+          "presentation_rect": [
+            1025,
+            144,
+            60,
+            17
+          ],
+          "minimum": 0,
+          "maximum": 9999,
+          "ignoreclick": 1,
+          "fontsize": 9,
+          "parameter_enable": 0
         }
       },
       {
@@ -2570,20 +2742,35 @@
             200,
             22
           ],
-          "text": "js coastline-max.js"
+          "text": "js coastline-max.js",
+          "numinlets": 1,
+          "numoutlets": 3
         }
       },
       {
         "box": {
-          "id": "unpack-notes",
+          "id": "midi-events",
           "maxclass": "newobj",
           "patching_rect": [
             610,
-            470,
-            130,
+            460,
+            100,
             22
           ],
-          "text": "unpack i i i"
+          "text": "t l b"
+        }
+      },
+      {
+        "box": {
+          "id": "midi-bytes",
+          "maxclass": "newobj",
+          "patching_rect": [
+            610,
+            500,
+            100,
+            22
+          ],
+          "text": "iter"
         }
       },
       {
@@ -2592,11 +2779,24 @@
           "maxclass": "newobj",
           "patching_rect": [
             610,
-            520,
+            540,
             100,
             22
           ],
-          "text": "noteout"
+          "text": "midiout"
+        }
+      },
+      {
+        "box": {
+          "id": "midi-counter",
+          "maxclass": "newobj",
+          "patching_rect": [
+            790,
+            500,
+            130,
+            22
+          ],
+          "text": "counter 0 9999"
         }
       },
       {
@@ -2614,15 +2814,43 @@
       },
       {
         "box": {
+          "id": "clock-counter",
+          "maxclass": "newobj",
+          "patching_rect": [
+            900,
+            350,
+            130,
+            22
+          ],
+          "text": "counter 0 9999"
+        }
+      },
+      {
+        "box": {
           "id": "ready",
           "maxclass": "newobj",
           "patching_rect": [
             14,
-            330,
+            300,
             120,
             22
           ],
-          "text": "live.thisdevice"
+          "text": "live.thisdevice",
+          "numinlets": 1,
+          "numoutlets": 3
+        }
+      },
+      {
+        "box": {
+          "id": "init-defer",
+          "maxclass": "newobj",
+          "patching_rect": [
+            14,
+            330,
+            100,
+            22
+          ],
+          "text": "deferlow"
         }
       },
       {
@@ -2640,6 +2868,19 @@
       },
       {
         "box": {
+          "id": "active",
+          "maxclass": "newobj",
+          "patching_rect": [
+            300,
+            300,
+            190,
+            22
+          ],
+          "text": "prepend deviceactive"
+        }
+      },
+      {
+        "box": {
           "id": "live-set",
           "maxclass": "newobj",
           "patching_rect": [
@@ -2648,20 +2889,9 @@
             145,
             22
           ],
-          "text": "live.path live_set"
-        }
-      },
-      {
-        "box": {
-          "id": "device-path",
-          "maxclass": "newobj",
-          "patching_rect": [
-            300,
-            420,
-            170,
-            22
-          ],
-          "text": "live.path this_device"
+          "text": "live.path live_set",
+          "numinlets": 1,
+          "numoutlets": 3
         }
       },
       {
@@ -2687,7 +2917,9 @@
             240,
             22
           ],
-          "text": "live.observer @property is_playing"
+          "text": "live.observer @property is_playing",
+          "numinlets": 2,
+          "numoutlets": 2
         }
       },
       {
@@ -2726,7 +2958,9 @@
             240,
             22
           ],
-          "text": "live.observer @property tempo"
+          "text": "live.observer @property tempo",
+          "numinlets": 2,
+          "numoutlets": 2
         }
       },
       {
@@ -2757,45 +2991,6 @@
       },
       {
         "box": {
-          "id": "active",
-          "maxclass": "newobj",
-          "patching_rect": [
-            14,
-            790,
-            240,
-            22
-          ],
-          "text": "live.observer @property is_active"
-        }
-      },
-      {
-        "box": {
-          "id": "active-route",
-          "maxclass": "newobj",
-          "patching_rect": [
-            14,
-            825,
-            170,
-            22
-          ],
-          "text": "route is_active"
-        }
-      },
-      {
-        "box": {
-          "id": "active-method",
-          "maxclass": "newobj",
-          "patching_rect": [
-            14,
-            860,
-            170,
-            22
-          ],
-          "text": "prepend deviceactive"
-        }
-      },
-      {
-        "box": {
           "id": "close",
           "maxclass": "newobj",
           "patching_rect": [
@@ -2822,6 +3017,123 @@
       },
       {
         "box": {
+          "id": "test-trigger",
+          "maxclass": "newobj",
+          "patching_rect": [
+            900,
+            650,
+            100,
+            22
+          ],
+          "text": "t b b b b"
+        }
+      },
+      {
+        "box": {
+          "id": "test-stop",
+          "maxclass": "message",
+          "patching_rect": [
+            1040,
+            650,
+            55,
+            22
+          ],
+          "text": "panic"
+        }
+      },
+      {
+        "box": {
+          "id": "test-on",
+          "maxclass": "message",
+          "patching_rect": [
+            900,
+            690,
+            110,
+            22
+          ],
+          "text": "144 48 100"
+        }
+      },
+      {
+        "box": {
+          "id": "test-delay",
+          "maxclass": "newobj",
+          "patching_rect": [
+            1040,
+            690,
+            100,
+            22
+          ],
+          "text": "delay 1000"
+        }
+      },
+      {
+        "box": {
+          "id": "test-off",
+          "maxclass": "message",
+          "patching_rect": [
+            1040,
+            730,
+            110,
+            22
+          ],
+          "text": "128 48 0"
+        }
+      },
+      {
+        "box": {
+          "id": "test-cancel",
+          "maxclass": "newobj",
+          "patching_rect": [
+            1180,
+            650,
+            80,
+            22
+          ],
+          "text": "t b b"
+        }
+      },
+      {
+        "box": {
+          "id": "test-stop-delay",
+          "maxclass": "message",
+          "patching_rect": [
+            1180,
+            690,
+            55,
+            22
+          ],
+          "text": "stop"
+        }
+      },
+      {
+        "box": {
+          "id": "test-on-stop",
+          "maxclass": "newobj",
+          "patching_rect": [
+            1180,
+            735,
+            80,
+            22
+          ],
+          "text": "sel 0"
+        }
+      },
+      {
+        "box": {
+          "id": "test-on-bypass",
+          "maxclass": "newobj",
+          "patching_rect": [
+            1180,
+            775,
+            80,
+            22
+          ],
+          "text": "sel 0"
+        }
+      },
+      {
+        "box": {
           "id": "clock-note",
           "maxclass": "comment",
           "patching_rect": [
@@ -2830,7 +3142,7 @@
             520,
             60
           ],
-          "text": "40 ticks = 1/12 quarter at Max's 480 PPQ. Tempo-relative metro uses the Live transport in a Max for Live device. MIDI generator: deliberately no MIDI input passthrough. Validate host timing in Live; classic js runs at low priority.",
+          "text": "40 ticks = 1/12 quarter at Max's 480 PPQ. Tempo-relative metro; verify transport coupling and phase in Live. MIDI generator without MIDI input passthrough. Classic js runs at low priority. TEST emits a native channel-1 note and holds the sequencer until RESET.",
           "linecount": 4
         }
       }
@@ -2857,7 +3169,8 @@
           "destination": [
             "engine",
             0
-          ]
+          ],
+          "order": 1
         }
       },
       {
@@ -2881,7 +3194,8 @@
           "destination": [
             "engine",
             0
-          ]
+          ],
+          "order": 1
         }
       },
       {
@@ -2905,7 +3219,8 @@
           "destination": [
             "engine",
             0
-          ]
+          ],
+          "order": 1
         }
       },
       {
@@ -3515,7 +3830,7 @@
             0
           ],
           "destination": [
-            "unpack-notes",
+            "midi-events",
             0
           ]
         }
@@ -3523,11 +3838,11 @@
       {
         "patchline": {
           "source": [
-            "unpack-notes",
+            "midi-events",
             0
           ],
           "destination": [
-            "midi-output",
+            "midi-bytes",
             0
           ]
         }
@@ -3535,24 +3850,36 @@
       {
         "patchline": {
           "source": [
-            "unpack-notes",
+            "midi-events",
             1
           ],
           "destination": [
-            "midi-output",
-            1
+            "midi-counter",
+            0
           ]
         }
       },
       {
         "patchline": {
           "source": [
-            "unpack-notes",
-            2
+            "midi-counter",
+            0
+          ],
+          "destination": [
+            "midi-count",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "midi-bytes",
+            0
           ],
           "destination": [
             "midi-output",
-            2
+            0
           ]
         }
       },
@@ -3589,6 +3916,32 @@
           "destination": [
             "engine",
             0
+          ],
+          "order": 0
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "clock",
+            0
+          ],
+          "destination": [
+            "clock-counter",
+            0
+          ],
+          "order": 1
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "clock-counter",
+            0
+          ],
+          "destination": [
+            "clock-count",
+            0
           ]
         }
       },
@@ -3599,7 +3952,43 @@
             0
           ],
           "destination": [
+            "init-defer",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "init-defer",
+            0
+          ],
+          "destination": [
             "init-trigger",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "ready",
+            1
+          ],
+          "destination": [
+            "active",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "active",
+            0
+          ],
+          "destination": [
+            "engine",
             0
           ]
         }
@@ -3951,21 +4340,7 @@
           "destination": [
             "live-set",
             0
-          ],
-          "order": 0
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "init-trigger",
-            1
-          ],
-          "destination": [
-            "device-path",
-            0
-          ],
-          "order": 1
+          ]
         }
       },
       {
@@ -3997,6 +4372,18 @@
           "source": [
             "live-set",
             0
+          ],
+          "destination": [
+            "playing",
+            1
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "live-set",
+            1
           ],
           "destination": [
             "playing",
@@ -4055,6 +4442,30 @@
       {
         "patchline": {
           "source": [
+            "playing-route",
+            0
+          ],
+          "destination": [
+            "live-state",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "playing-route",
+            1
+          ],
+          "destination": [
+            "live-state",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
             "live-set",
             0
           ],
@@ -4067,6 +4478,18 @@
       {
         "patchline": {
           "source": [
+            "live-set",
+            1
+          ],
+          "destination": [
+            "tempo",
+            1
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
             "tempo",
             0
           ],
@@ -4104,66 +4527,6 @@
         "patchline": {
           "source": [
             "tempo-method",
-            0
-          ],
-          "destination": [
-            "engine",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "device-path",
-            0
-          ],
-          "destination": [
-            "active",
-            1
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "active",
-            0
-          ],
-          "destination": [
-            "active-route",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "active-route",
-            0
-          ],
-          "destination": [
-            "active-method",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "active-route",
-            1
-          ],
-          "destination": [
-            "active-method",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "active-method",
             0
           ],
           "destination": [
@@ -4192,6 +4555,263 @@
           ],
           "destination": [
             "engine",
+            0
+          ],
+          "order": 1
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "ui-test",
+            0
+          ],
+          "destination": [
+            "test-trigger",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-trigger",
+            2
+          ],
+          "destination": [
+            "test-stop",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-stop",
+            0
+          ],
+          "destination": [
+            "engine",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-trigger",
+            1
+          ],
+          "destination": [
+            "test-on",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-on",
+            0
+          ],
+          "destination": [
+            "midi-events",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-trigger",
+            0
+          ],
+          "destination": [
+            "test-delay",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-delay",
+            0
+          ],
+          "destination": [
+            "test-off",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-off",
+            0
+          ],
+          "destination": [
+            "midi-events",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-cancel",
+            1
+          ],
+          "destination": [
+            "test-stop-delay",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-stop-delay",
+            0
+          ],
+          "destination": [
+            "test-delay",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-cancel",
+            0
+          ],
+          "destination": [
+            "test-off",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-trigger",
+            3
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "do-reset",
+            0
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ],
+          "order": 0
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "do-panic",
+            0
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ],
+          "order": 0
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "set-enabled",
+            0
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ],
+          "order": 0
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "closing-panic",
+            0
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ],
+          "order": 0
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "playing-route",
+            0
+          ],
+          "destination": [
+            "test-on-stop",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "playing-route",
+            1
+          ],
+          "destination": [
+            "test-on-stop",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-on-stop",
+            0
+          ],
+          "destination": [
+            "test-cancel",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "ready",
+            1
+          ],
+          "destination": [
+            "test-on-bypass",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "test-on-bypass",
+            0
+          ],
+          "destination": [
+            "test-cancel",
             0
           ]
         }

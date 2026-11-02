@@ -1,4 +1,4 @@
-COASTLINE - Version 0.2 / Build fuer den Test in Live
+COASTLINE - Version 0.3 / Build fuer den Test in Live
 ==================================================
 
 1. ZIP entpacken.
@@ -6,6 +6,16 @@ COASTLINE - Version 0.2 / Build fuer den Test in Live
 3. COASTLINE.amxd direkt vor ein Instrument auf eine MIDI-Spur ziehen.
    Im GitHub-Projekt liegt die Datei im Ordner device.
 4. RUN einschalten und die Live-Wiedergabe starten.
+
+KEIN MIDI?
+Zuerst links TEST anklicken: MIDI-Note 48 auf Kanal 1 fuer eine Sekunde.
+Die Testnote benoetigt weder JavaScript noch Live-API oder einen Takt.
+Sie haelt den Sequencer an; danach RESET druecken.
+Unten rechts LIVE, CLK und MIDI ablesen:
+- LIVE muss bei Live-Wiedergabe 1 sein.
+- CLK muss bei RUN und Wiedergabe hochzaehlen.
+- MIDI zaehlt MIDI-Pakete einschliesslich Note-offs und TEST.
+Bei Problemen diese Werte und die aktuellen Max-Console-Meldungen mitteilen.
 
 Die .amxd enthaelt den kompletten Patch und die drei Skripte. Es ist kein
 Kopieren von Objekten und kein Einstellen des Patcher Inspectors erforderlich.

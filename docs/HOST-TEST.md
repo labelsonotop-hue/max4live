@@ -10,6 +10,12 @@ Integrationsprüfungen von den automatisierten Logiktests.
   Die Max-Konsole darf keine fehlenden Dateien oder Objekte melden. Das Laden
   des programmgesteuert erzeugten Gerätebuilds ist selbst Teil dieser Prüfung.
 - Präsentation: beide Rhythmusreihen, alle Regler, RUN, RESET und PANIC sichtbar.
+- TEST auf einem internen Instrument mit kurzem Attack abhoeren: MIDI-Note 48
+  auf Kanal 1, eine Sekunde. Die Ausgabe muss auch ohne laufenden Live-Transport
+  funktionieren. Danach RESET zum Fortsetzen der Sequenz verwenden.
+- Bei laufender Live-Wiedergabe muss LIVE auf 1 wechseln. Mit RUN muessen CLK
+  und MIDI steigen. Bleibt ein Wert stehen, den Zustand zusammen mit den
+  Konsolenmeldungen protokollieren. Die MIDI-Anzeige zaehlt auch Note-offs.
 - Root, einen Pitch-Offset, Kanal und B-Unterteilung ändern, Set speichern,
   schließen und öffnen. Werte und tatsächliche Ausgabe müssen wiederhergestellt
   sein. Zweites Device darf einen unabhängigen Zustand besitzen.
@@ -51,6 +57,9 @@ Rasterprüfungen Ratchet und Swing auf 0, Hit auf 100 und alle Pitch-Offsets auf
   ob der Host den eigenen Note-off noch durchlässt.
 - Zwei aufeinanderfolgende identische Noten sowie schnelle Ratchets testen.
   Jede Note braucht einen eigenen Note-off. Keine überlappenden Noten aufnehmen.
+- TEST wiederholt klicken und mit RESET, PANIC, RUN, Bypass und Live-Stop
+  unterbrechen. Die Testnote muss beendet und ihr geplanter Note-off verworfen
+  werden, bevor die Sequenz wieder startet.
 - CPU-Last erhöhen und MIDI aufnehmen. Jitter und hörbare Schwankungen bewerten;
   die Classic-js-Implementierung garantiert keine samplegenauen Ereignisse.
 

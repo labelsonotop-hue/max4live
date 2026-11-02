@@ -3,7 +3,7 @@
 Ein experimenteller, **monophoner MIDI-Sequencer für Max for Live**, ausgelegt auf
 polyrhythmische und perkussive Patterns am Make Noise **0-Coast**.
 
-**Stand: 0.2, Prototyp für den Host-Test.** Enthalten sind ein editierbarer
+**Stand: 0.3, Prototyp für den Host-Test.** Enthalten sind ein editierbarer
 Quellpatch und `device/COASTLINE.amxd` mit eingebetteten Skripten. Der Gerätebuild
 wird programmgesteuert erzeugt; sein Archivformat wurde gegen ein offizielles
 Ableton-MIDI-Gerät geprüft. Laden, Transport und MIDI-Ausgabe müssen noch in
@@ -46,6 +46,25 @@ Node ist nur für Entwicklung und Tests nötig, nicht für das spätere Device.
    öffnen, den aktuellen Fehlertext notieren und zusammen mit einem Screenshot
    melden. Die programmgesteuerte `.amxd` ist ein Build für diesen Host-Test.
 
+Bei fehlender Ausgabe zuerst links **TEST** anklicken. Der Button sendet eine
+Testnote (MIDI 48, Kanal 1, eine Sekunde) über native Max-Objekte. Dafür werden
+weder JavaScript noch Live-API oder Sequencer-Takt benötigt. Der Sequencer wird
+dabei angehalten. Anschließend **RESET** drücken, um ihn wieder freizugeben.
+Zum Testen ein internes Instrument mit kurzem Attack verwenden.
+
+Die drei Anzeigen unten rechts helfen beim Eingrenzen:
+
+| Anzeige | Bedeutung |
+| --- | --- |
+| LIVE | Von Live gemeldeter Wiedergabestatus: 1 während laufender Wiedergabe. |
+| CLK | Zählt Taktimpulse des Max-Metronoms. Muss bei RUN und laufender Wiedergabe steigen. |
+| MIDI | Zählt ausgegebene MIDI-Pakete, einschließlich Note-offs und TEST. Belegt die Ausgabe im Patch; der Empfang im Ziel ist zusätzlich zu prüfen. |
+
+Wenn TEST hörbar ist und die Sequenz stillsteht, bitte LIVE und CLK melden.
+Wenn MIDI steigt und das Instrument stumm bleibt, die Geräte-Reihenfolge und
+Zielspur prüfen. Alle drei Werte zusammen mit aktuellen Konsolenmeldungen
+angeben. Beim Laden schreibt die Engine `COASTLINE 0.3 ready` in die Konsole.
+
 Zum Bearbeiten liegt `device/COASTLINE.maxpat` daneben. Seine drei `.js`-Dateien
 müssen für die Arbeit am Quellpatch im selben Ordner bleiben. Alle Regler stehen
 seit 0.2 auch in der Patching-Ansicht im sichtbaren Gerätebereich. Im Build werden
@@ -74,7 +93,8 @@ Zum Einstieg: `Gate = 15–35 %`, `Root # = 48`, kurze Contour am 0-Coast,
 `Ratchet = 10–25 %`. Für einen perkussiven Grundversuch alle Pitch-Offsets auf
 0 setzen. Danach einen langen Tonhöhenzyklus gegen kurze Rhythmuszyklen setzen.
 
-COASTLINE sendet ausschließlich **Noten und Note-offs**. A hat Velocity 101, B 77,
+COASTLINE sendet über `midiout` ausschließlich **Noten und Note-offs** als
+explizite MIDI-Bytes. A hat Velocity 101, B 77,
 Kollisionen 120; Ratchets werden leiser. Ob Velocity den Klang beeinflusst, hängt
 von der MIDI-/Patch-Konfiguration des 0-Coast ab. Es werden keine festen
 Zuordnungen zu dessen Klangparametern vorausgesetzt. MIDI-Clock, CC-Modulation
@@ -87,6 +107,7 @@ und MIDI-B-Konfiguration sind nicht Bestandteil dieser Version.
 | RUN | Ein-/Ausschalten; schaltet die eigene aktive Note aus und startet die Zyklen beim Einschalten neu. |
 | RESET | Setzt alle Zyklen auf den Anfang; hebt Panic auf. |
 | PANIC | Beendet die eigene aktive Note, löscht geplante Ereignisse und bleibt stumm, bis RESET, RUN oder ein neuer Transportstart erfolgt. |
+| TEST | Stoppt die Sequenz und spielt eine native Testnote auf Kanal 1. RESET gibt die Sequenz wieder frei. |
 | Length / Hits | Zykluslänge / Zahl gleichmäßig verteilter Anschläge; effektiv höchstens ein Hit pro Schritt. |
 | Rotate | Dreht das Pattern nach rechts; der Wert wird modulo Zykluslänge ausgewertet. |
 | Root # | Absolute MIDI-Notennummer, unabhängig von unterschiedlichen Oktavbezeichnungen in Max und Live. |
@@ -131,5 +152,9 @@ Die automatisierten Tests prüfen Verteilung und Rotation aller Patternlängen,
 4:3-Unterteilung, Kollisionen, Tonhöhenzyklen, MIDI-Grenzen, deterministischen
 Zufall, Ratchet-Zeitfenster und den Max-Adapter mit einem simulierten Scheduler.
 Weitere Tests prüfen eingebettete Skripte, vollständige Verkabelung und sichtbare
-Regler in beiden Max-Ansichten. Sie ersetzen keinen Max-/Live-Test. Die konkrete Host-Prüfung steht in
+Regler in beiden Max-Ansichten. Seit 0.3 wird die Live-ID über den folgenden
+Ausgang von `live.path` übernommen und die Geräteaktivierung direkt aus
+`live.thisdevice` gelesen. Die Tests prüfen diese Verbindungen, die MIDI-Bytes
+und einen nativen TEST-Pfad ohne JavaScript. Sie ersetzen keinen Max-/Live-Test.
+Die konkrete Host-Prüfung steht in
 [`docs/HOST-TEST.md`](docs/HOST-TEST.md).
